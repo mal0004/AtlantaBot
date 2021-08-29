@@ -111,7 +111,7 @@ module.exports = class {
 				const userData = await client.findOrCreateUser({ id: u.id });
 				if(userData.afk){
 					message.error("general/setafk:IS_AFK", {
-						username: u.tag,
+						user: u.tag,
 						reason: userData.afk
 					});
 				}
@@ -139,7 +139,7 @@ module.exports = class {
 			});
 		}
 
-		if(message.guild && data.guild.ignoredChannels.includes(message.channel.id) && !message.member.hasPermission("MANAGE_MESSAGES")){
+		if(message.guild && data.guild.ignoredChannels.includes(message.channel.id) && !message.member.permissions.has("MANAGE_MESSAGES")){
 			message.delete();
 			message.author.send(message.translate("misc:RESTRICTED_CHANNEL", {
 				channel: message.channel.toString()

@@ -14,16 +14,14 @@ router.get("/login", async function(req, res) {
 });
 
 router.get("/callback", async (req, res) => {
+	if(!req.query.code) return res.redirect(req.client.config.dashboard.failureURL);
 	if(req.query.state && req.query.state.startsWith("invite")){
 		if(req.query.code){
 			const guildID = req.query.state.substr("invite".length, req.query.state.length);
 			req.client.knownGuilds.push({ id: guildID, user: req.user.id });
 			return res.redirect("/manage/"+guildID);
-		} else {
-			return res.redirect("/selector");
 		}
 	}
-	if(!req.query.code) res.redirect(req.client.config.failureURL);
 	const redirectURL = req.client.states[req.query.state] || "/selector";
 	const params = new URLSearchParams();
 	params.set("grant_type", "authorization_code");
@@ -73,7 +71,7 @@ router.get("/callback", async (req, res) => {
 	// Update session
 	req.session.user = { ... userData.infos, ... { guilds } };
 	const user = await req.client.users.fetch(req.session.user.id);
-	const userDB = await req.client.findOrCreateUser(req.session.user.id);
+	const userDB = await req.client.findOrCreateUser({ id: req.session.user.id });
 	const logsChannel = req.client.channels.cache.get(req.client.config.dashboard.logs);
 	if(!userDB.logged && logsChannel && user){
 		const embed = new Discord.MessageEmbed()
@@ -82,7 +80,7 @@ router.get("/callback", async (req, res) => {
 			.setDescription(req.client.translate("dashboard:FIRST_LOGIN", {
 				user: user.tag
 			}));
-		logsChannel.send(embed);
+		logsChannel.send({ embeds: [embed] });
 		userDB.logged = true;
 		userDB.save();
 	}

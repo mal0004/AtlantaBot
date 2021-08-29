@@ -1,7 +1,6 @@
-const { MessageEmbed, Util } = require("discord.js");
+const { MessageEmbed, Util, Client, Collection, Intents } = require("discord.js");
 const { GiveawaysManager } = require("discord-giveaways");
 const { Player } = require("discord-player");
-const { Client, Collection } = require("discord.js");
 const { Client: Joker } = require("blague.xyz");
 
 const util = require("util"),
@@ -19,8 +18,20 @@ moment.relativeTimeThreshold("M", 12);
 // Creates Atlanta class
 class Atlanta extends Client {
 
-	constructor (options) {
-		super(options);
+	constructor () {
+		super({
+			intents: [
+				Intents.FLAGS.GUILDS,
+				Intents.FLAGS.GUILD_MEMBERS,
+				Intents.FLAGS.GUILD_MESSAGES,
+				Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+				Intents.FLAGS.GUILD_VOICE_STATES,
+				Intents.FLAGS.DIRECT_MESSAGES
+			],
+			allowedMentions: {
+				parse: ["users"]
+			}
+		});
 		this.config = require("../config"); // Load the config file
 		this.customEmojis = require("../emojis.json"); // load the bot's emojis
 		this.languages = require("../languages/language-meta.json"); // Load the bot's languages
@@ -57,7 +68,8 @@ class Atlanta extends Client {
 		}
 
 		this.player = new Player(this, {
-			leaveOnEmpty: false
+			leaveOnEmpty: false,
+			enableLive: true
 		});
 		this.player
 			.on("trackStart", (message, track) => {
@@ -73,12 +85,12 @@ class Atlanta extends Client {
 				}));
 			})
 			.on("searchResults", (message, query, tracks) => {
-				if (tracks.length > 20) tracks = tracks.slice(0, 20);
+				if (tracks.length > 10) tracks = tracks.slice(0, 10);
 				const embed = new MessageEmbed()
 					.setDescription(Util.escapeSpoiler(tracks.map((t, i) => `**${++i} -** ${t.title}`).join("\n")))
 					.setFooter(message.translate("music/play:RESULTS_FOOTER"))
 					.setColor(this.config.embed.color);
-				message.channel.send(embed);
+				message.channel.send({ embeds: [embed] });
 			})
 			.on("searchInvalidResponse", (message, query, tracks, content, collector) => {
 				if (content === "cancel") {
@@ -115,7 +127,7 @@ class Atlanta extends Client {
 			.on("channelEmpty", () => {
 				// do nothing, leaveOnEmpty is not enabled
 			})
-			.on("error", (message, error) => {
+			.on("error", (error, message) => {
 				switch (error) {
 					case "NotConnected":
 						message.error("music/play:NO_VOICE_CHANNEL");

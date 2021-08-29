@@ -24,14 +24,14 @@ class Serverinfo extends Command {
 		if(args[0]){
 			let found = this.client.guilds.cache.get(args[0]);
 			if(!found){
-				found = this.client.cache.guilds.find((g) => g.name === args.join(" "));
+				found = this.client.guilds.cache.find((g) => g.name === args.join(" "));
 				if(found){
 					guild = found;
 				}
 			}
 		}
 
-		guild = await guild.fetch();
+		await guild.members.fetch();
 
 		const embed = new Discord.MessageEmbed()
 			.setAuthor(guild.name, guild.iconURL({ dynamic: true }))
@@ -45,7 +45,7 @@ class Serverinfo extends Command {
 			}), true)
 			.addField(this.client.customEmojis.afk+message.translate("general/serverinfo:AFK_CHANNEL"), guild.afkChannel || message.translate("general/serverinfo:NO_AFK_CHANNEL"), true)
 			.addField(this.client.customEmojis.id+message.translate("common:ID"), guild.id, true)
-			.addField(this.client.customEmojis.crown+message.translate("common:OWNER"), guild.owner, true)
+			.addField(this.client.customEmojis.crown+message.translate("common:OWNER"), `<@${guild.ownerID}>`, true)
 			.addField(this.client.customEmojis.boost+message.translate("general/serverinfo:BOOSTS"), guild.premiumSubscriptionCount || 0, true)
 			.addField(this.client.customEmojis.channels+message.translate("common:CHANNELS"), message.translate("general/serverinfo:TEXT_CHANNELS", {
 				count: guild.channels.cache.filter(c => c.type === "text").size
@@ -57,7 +57,7 @@ class Serverinfo extends Command {
 			.setColor(data.config.embed.color)
 			.setFooter(data.config.embed.footer);
 
-		message.channel.send(embed);
+		message.channel.send({ embeds: [embed] });
 	}
 
 }
