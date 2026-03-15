@@ -7,6 +7,9 @@ node_modules
 package-lock.json
 yarn.lock
 
+# Bower vendored assets
+dashboard/public/bower_components
+
 # TypeScript build output
 dist/
 
