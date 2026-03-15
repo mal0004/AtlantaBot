@@ -1,14 +1,14 @@
 # Bot Configuration
 config.js
+.env.keys
 
 # Node modules
 node_modules
 package-lock.json
 yarn.lock
 
-# Fortnite Shop images
-assets/img/fortnite/shop/**/*.png
-!assets/img/fortnite/shop/**/example-shop.png
+# TypeScript build output
+dist/
 
 # DB
 giveaways.json
@@ -22,3 +22,4 @@ report*.json
 
 # IDE
 .vscode
+.idea
